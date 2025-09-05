@@ -1,0 +1,19 @@
+# Entorno virtual
+.venv/
+env/
+venv/
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Base de datos local (SQLite)
+db.sqlite3
+
+# Configuración local
+.env
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
