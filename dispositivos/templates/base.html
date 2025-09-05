@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <title>{% block title %}EcoEnergy{% endblock %}</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="app">
+  <header class="topbar">
+    <div class="brand">EcoEnergy</div>
+    <nav>
+      <a href="{% url 'dashboard' %}">Dashboard</a>
+      <a href="{% url 'device_list' %}">Dispositivos</a>
+      <a href="{% url 'measurement_list' %}">Mediciones</a>
+    </nav>
+    <div class="auth">
+      <button class="btn btn-secondary">Iniciar sesión</button>
+      <button class="btn btn-primary">Registrarse</button>
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <span>© 2025 EcoEnergy</span>
+    <a>Soporte</a>
+  </footer>
+</body>
+</html>

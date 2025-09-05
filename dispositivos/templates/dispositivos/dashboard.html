@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · EcoEnergy{% endblock %}
+{% block content %}
+
+<div class="grid kpis">
+  <section class="card">
+    <h3>DISPOSITIVOS POR CATEGORÍA</h3>
+    <ul class="list">
+      {% for c in counts_by_cat %}
+        <li><span>{{ c.name }}</span><span class="badge">{{ c.n }}</span></li>
+      {% empty %}<li>Sin categorías</li>{% endfor %}
+    </ul>
+  </section>
+
+  <section class="card">
+    <h3>DISPOSITIVOS POR ZONA</h3>
+    <ul class="list">
+      {% for z in counts_by_zone %}
+        <li><span>{{ z.name }}</span><span class="badge">{{ z.n }}</span></li>
+      {% empty %}<li>Sin zonas</li>{% endfor %}
+    </ul>
+  </section>
+
+  <section class="card">
+    <h3>ALERTAS DE LA SEMANA</h3>
+    <div class="tags">
+      <span class="tag tag-danger">Grave: {{ sev_map.critical }}</span>
+      <span class="tag tag-warn">Alto: {{ sev_map.high }}</span>
+      <span class="tag tag-muted">Mediano: {{ sev_map.medium }}</span>
+    </div>
+    <small>* Criterios de severidad configurables por dispositivo.</small>
+  </section>
+</div>
+
+<div class="grid halves">
+  <section class="card">
+    <div class="card-head">
+      <h3>ÚLTIMAS 10 MEDICIONES</h3>
+      <a href="{% url 'measurement_list' %}">Ver todas</a>
+    </div>
+    <table class="table">
+      <thead><tr><th>Fecha/Hora</th><th>Dispositivo</th><th>Valor</th></tr></thead>
+      <tbody>
+      {% for m in last_measurements %}
+        <tr>
+          <td>{{ m.measured_at }}</td>
+          <td><a href="{% url 'device_detail' m.device.pk %}">{{ m.device.name }}</a></td>
+          <td>{{ m.value }} {{ m.unit }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3">Sin mediciones</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h3>ALERTAS RECIENTES</h3>
+      <a href="{% url 'alert_list' %}">Ver todas</a>
+    </div>
+    <ul class="alerts">
+      {% for a in recent_alerts %}
+        <li>
+          <a href="{% url 'device_detail' a.device.pk %}">{{ a.device.name }}</a>
+          <div class="row">
+            <span class="pill {% if a.severity == 'critical' %}danger{% elif a.severity == 'high' %}warn{% else %}muted{% endif %}">
+              {{ a.severity|title }}
+            </span>
+            <span class="muted">{{ a.message }}</span>
+          </div>
+        </li>
+      {% empty %}<li>Sin alertas</li>{% endfor %}
+    </ul>
+  </section>
+</div>
+
+<section class="card">
+  <div class="card-head">
+    <h3>DISPOSITIVOS</h3>
+    <a href="{% url 'device_list' %}">Ir a listado</a>
+  </div>
+
+  <form method="get" class="filters">
+    <label>Categoría</label>
+    <select name="category">
+      <option value="">Todas</option>
+      {% for c in categories %}
+        <option value="{{ c.id }}" {% if cat_selected|stringformat:"s" == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+    <label>Zona</label>
+    <select name="zone">
+      <option value="">Todas</option>
+      {% for z in zones %}
+        <option value="{{ z.id }}" {% if zone_selected|stringformat:"s" == z.id|stringformat:"s" %}selected{% endif %}>{{ z.name }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-dark" type="submit">Aplicar filtros</button>
+  </form>
+
+  <div class="cards">
+    {% for d in device_cards %}
+      <article class="device-card">
+        <a href="{% url 'device_detail' d.pk %}" class="name">{{ d.name }}</a>
+        <div class="meta">{{ d.category.name }} · {{ d.zone.name }}</div>
+      </article>
+    {% empty %}
+      <div class="muted">No hay dispositivos con estos filtros.</div>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Dispositivos · EcoEnergy{% endblock %}
+{% block content %}
+
+<a class="back" href="{% url 'dashboard' %}">Volver al dashboard</a>
+<h2>DISPOSITIVOS</h2>
+
+<form method="get" class="filters row">
+  <div>
+    <label>Categoría</label>
+    <select name="category">
+      <option value="">Todas</option>
+      {% for c in categories %}
+        <option value="{{ c.id }}" {% if cat_selected|stringformat:"s" == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>Zona</label>
+    <select name="zone">
+      <option value="">Todas</option>
+      {% for z in zones %}
+        <option value="{{ z.id }}" {% if zone_selected|stringformat:"s" == z.id|stringformat:"s" %}selected{% endif %}>{{ z.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="grow">
+    <label>Buscar</label>
+    <input type="text" name="q" placeholder="Nombre de dispositivo" value="{{ q }}">
+  </div>
+  <button class="btn btn-dark" type="submit">Aplicar filtros</button>
+</form>
+
+<section class="card">
+  <h3>Listado de dispositivos</h3>
+  <table class="table">
+    <thead><tr><th>Nombre</th><th>Categoría</th><th>Zona</th><th>Acciones</th></tr></thead>
+    <tbody>
+      {% for d in devices %}
+        <tr>
+          <td>{{ d.name }}</td>
+          <td>{{ d.category.name }}</td>
+          <td>{{ d.zone.name }}</td>
+          <td><a class="btn btn-light" href="{% url 'device_detail' d.pk %}">Ver detalle</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">No hay resultados</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if devices.paginator.num_pages > 1 %}
+  <div class="pagination">
+    {% if devices.has_previous %}
+      <a href="?page={{ devices.previous_page_number }}&category={{ cat_selected }}&zone={{ zone_selected }}&q={{ q }}">Anterior</a>
+    {% endif %}
+    <span>{{ devices.number }}</span>
+    {% if devices.has_next %}
+      <a href="?page={{ devices.next_page_number }}&category={{ cat_selected }}&zone={{ zone_selected }}&q={{ q }}">Siguiente</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</section>
+
+{% endblock %}
