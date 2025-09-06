@@ -1,6 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Usuario{% endblock %}
+{% block title %}Detalle de usuario{% endblock %}
 {% block content %}
-<h2>{{ user.username }}</h2>
-<p>Email: {{ user.email }}</p>
+<h2>Perfil de {{ user_obj.username }}</h2>
+<ul class="list">
+  <li><strong>Email:</strong> {{ user_obj.email }}</li>
+  <li><strong>Organización:</strong> {{ user_obj.organization }}</li>
+  <li><strong>Estado:</strong> {{ user_obj.estado }}</li>
+</ul>
+<a href="{% url 'user_list' %}" class="btn btn-dark">Volver a lista</a>
 {% endblock %}

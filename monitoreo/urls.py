@@ -16,17 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from dispositivos import views as dispositivos_views
+from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
-    # Panel de administración
     path("admin/", admin.site.urls),
-
-    # App usuarios (registro, login, logout, perfil)
     path("usuarios/", include("usuarios.urls")),
-
-    # App dispositivos (CRUD principal)
     path("dispositivos/", include("dispositivos.urls")),
-
-    # Ruta raíz → lista de dispositivos
-    path("", include("dispositivos.urls")),
+    path("", login_required(dispositivos_views.dashboard), name="dashboard"), # Página principal requiere login
 ]

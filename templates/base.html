@@ -1,0 +1,45 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <title>{% block title %}EcoEnergy{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body class="app">
+  <header class="topbar">
+    <div class="brand">EcoEnergy</div>
+    <nav>
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'device_list' %}">Dispositivos</a>
+        <a href="{% url 'measurement_list' %}">Mediciones</a>
+      {% endif %}
+    </nav>
+    <div class="auth">
+  {% if user.is_authenticated %}
+    <span class="muted">Hola, {{ user.username }}</span>
+    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+      {% csrf_token %}
+      <button class="btn btn-secondary" type="submit">Cerrar sesión</button>
+    </form>
+  {% else %}
+    <a class="btn btn-secondary" href="{% url 'login' %}">Iniciar sesión</a>
+    <a class="btn btn-primary" href="{% url 'signup' %}">Registrarse</a>
+  {% endif %}
+</div>
+  </header>
+
+  <main class="container">
+    {% if messages %}
+      <ul class="messages">{% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <span>© 2025 EcoEnergy</span>
+    <a>Soporte</a>
+  </footer>
+</body>
+</html>
