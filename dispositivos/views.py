@@ -71,7 +71,7 @@ def dashboard(request):
         "zone_selected": zon,
         "device_cards": device_cards,
     }
-    return render(request, "dashboard.html", context)
+    return render(request, "dispositivos/dashboard.html", context)
 
 def device_list(request):
     cat = request.GET.get("category") or ""
