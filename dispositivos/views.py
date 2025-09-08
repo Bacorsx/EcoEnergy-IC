@@ -141,7 +141,12 @@ def device_delete(request, pk):
 @login_required
 def measurement_list(request):
     qs = Measurement.objects.select_related("device").order_by("-measured_at")[:100]
-    return render(request, "dispositivos/measurement_list.html", {"measurements": qs})
+    paginator = Paginator(qs, 50) # 50 por página
+    page = request.GET.get("page")
+    measurements = paginator.get_page(page)
+    return render(request, "dispositivos/measurement_list.html", {
+        "measurements": measurements,
+    })
 
 @login_required
 def alert_list(request):

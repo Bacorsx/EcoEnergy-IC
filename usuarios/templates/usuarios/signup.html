@@ -1,16 +1,58 @@
 {% extends "base.html" %}
 {% block title %}Registro{% endblock %}
+
 {% block content %}
-<h2>Crear cuenta</h2>
-<form method="post" class="form">
-  {% csrf_token %}
-  {{ form.non_field_errors }}
-  <div class="field">{{ form.username.label_tag }} {{ form.username }}</div>
-  <div class="field">{{ form.email.label_tag }} {{ form.email }}</div>
-  <div class="field">{{ form.organization.label_tag }} {{ form.organization }}</div>
-  <div class="field">{{ form.password1.label_tag }} {{ form.password1 }}</div>
-  <div class="field">{{ form.password2.label_tag }} {{ form.password2 }}</div>
-  <button class="btn btn-dark" type="submit">Registrarse</button>
-  <a href="{% url 'login' %}" class="btn btn-light">¿Ya tienes cuenta? Inicia sesión</a>
-</form>
+<section class="card">
+  <h2>Crear cuenta</h2>
+
+  <form method="post" class="form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <div class="field">
+      {{ form.username.label_tag }} 
+      {{ form.username }}
+      {% if form.username.errors %}
+        <div class="error">{{ form.username.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="field">
+      {{ form.email.label_tag }} 
+      {{ form.email }}
+      {% if form.email.errors %}
+        <div class="error">{{ form.email.errors }}</div>
+      {% endif %}
+    </div>
+
+     <div class="field">
+      {{ form.organization_name.label_tag }} 
+      {{ form.organization_name }}
+      {% if form.organization_name.errors %}
+        <div class="error">{{ form.organization_name.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="field">
+      {{ form.password1.label_tag }} 
+      {{ form.password1 }}
+      {% if form.password1.errors %}
+        <div class="error">{{ form.password1.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="field">
+      {{ form.password2.label_tag }} 
+      {{ form.password2 }}
+      {% if form.password2.errors %}
+        <div class="error">{{ form.password2.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-dark" type="submit">Registrarse</button>
+      <a href="{% url 'login' %}" class="btn btn-light">¿Ya tienes cuenta? Inicia sesión</a>
+    </div>
+  </form>
+</section>
 {% endblock %}

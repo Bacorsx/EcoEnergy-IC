@@ -2,11 +2,14 @@
 {% block title %}Detalle{% endblock %}
 {% block content %}
 <h2>{{ device.name }}</h2>
-<p>Categoría: {{ device.category.name }} | Zona: {{ device.zone.name }} | Estado: {{ device.get_status_display }}</p>
+<p>
+  Categoría: {{ device.category.name }} |
+  Zona: {{ device.zone.name }}
+</p>
 <p>Modelo: {{ device.model }} | Serie: {{ device.serial_number }}</p>
 
 <a href="{% url 'device_update' device.pk %}">Editar</a>
-<form method="post" action="{% url 'device_delete' device.pk %}" style="display:inline">
+<form method="post" action="{% url 'device_delete' device.pk %}" style="display:inline" onsubmit="return confirm('¿Eliminar este dispositivo?');">
   {% csrf_token %}
   <button type="submit">Eliminar</button>
 </form>
