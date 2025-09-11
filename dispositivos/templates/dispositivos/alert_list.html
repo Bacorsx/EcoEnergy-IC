@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Alertas{% endblock %}
+
+{% block content %}
+<a class="back" href="{% url "dashboard" %}">Volver al dashboard</a>
+<h2>Lista de Alertas</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Fecha/Hora</th>
+      <th>Dispositivo</th>
+      <th>Severidad</th>
+      <th>Mensaje</th>
+      <th>Estado</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in alerts %}
+      <tr>
+        <td>{{ a.created_at }}</td>
+        <td><a href="{% url "device_detail" a.device.pk %}">{{ a.device.name }}</a></td>
+        <td>
+          <span class="pill {% if a.severity == "GRAVE" %}danger{% elif a.severity == "ALTO" %}warn{% else %}muted{% endif %}">
+            {{ a.get_severity_display }}
+          </span>
+        </td>
+        <td>{{ a.message }}</td>
+        <td>{% if a.is_resolved %}Resuelta{% else %}Pendiente{% endif %}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="5">No hay alertas registradas.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

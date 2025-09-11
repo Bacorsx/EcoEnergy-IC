@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Mediciones{% endblock %}
+
+{% block content %}
+<h2>Lista de Mediciones</h2>
+
+<form method="get" class="filters">
+  <label for="device">Dispositivo</label>
+  <select name="device" id="device">
+    <option value="">Todos</option>
+    {% for d in devices %}
+      <option value="{{ d.id }}" {% if device_selected|stringformat:"s" == d.id|stringformat:"s" %}selected{% endif %}>
+        {{ d.name }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <label for="unit">Unidad</label>
+  <select name="unit" id="unit">
+    <option value="">Todas</option>
+    {% for u in units %}
+      <option value="{{ u }}" {% if unit_selected == u %}selected{% endif %}>{{ u }}</option>
+    {% endfor %}
+  </select>
+
+  <button class="btn btn-dark" type="submit">Filtrar</button>
+</form>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Fecha/Hora</th>
+      <th>Dispositivo</th>
+      <th>Valor</th>
+      <th>Unidad</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for m in measurements %}
+      <tr>
+        <td>{{ m.measured_at }}</td>
+        <td><a href="{% url 'device_detail' m.device.pk %}">{{ m.device.name }}</a></td>
+        <td>{{ m.value }}</td>
+        <td>{{ m.unit }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4">No hay mediciones registradas.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if measurements.paginator.num_pages > 1 %}
+<div class="pagination">
+  {% if measurements.has_previous %}
+    <a href="?page={{ measurements.previous_page_number }}&device={{ device_selected }}&unit={{ unit_selected }}">Anterior</a>
+  {% endif %}
+  <span>Página {{ measurements.number }} de {{ measurements.paginator.num_pages }}</span>
+  {% if measurements.has_next %}
+    <a href="?page={{ measurements.next_page_number }}&device={{ device_selected }}&unit={{ unit_selected }}">Siguiente</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

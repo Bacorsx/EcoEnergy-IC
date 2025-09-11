@@ -4,9 +4,9 @@ from .models import Device, Measurement, Alert
 class DeviceForm(forms.ModelForm):
     class Meta:
         model = Device
-        fields = ['organization', 'category', 
+        fields = ['category',
                   'zone', 'name', 'model', 
-                  'serial_number', 'status', 'installed_at','estado'
+                  'serial_number', 'installed_at'
                 ]
 
     def clean_name(self):

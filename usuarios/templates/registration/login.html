@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Iniciar sesión{% endblock %}
+{% block content %}
+<h2>Iniciar sesión</h2>
+<form method="post" class="form">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+  <div class="field">
+    <label for="id_username">Usuario</label>
+    <input type="text" name="username" id="id_username" class="form-control" required>
+  </div>
+  <div class="field">
+    <label for="id_password">Contraseña</label>
+    <input type="password" name="password" id="id_password" class="form-control" required>
+  </div>
+  <button class="btn btn-dark" type="submit">Entrar</button>
+  <a href="{% url 'password_reset' %}" class="btn btn-light">¿Olvidaste tu contraseña?</a>
+</form>
+{% endblock %}

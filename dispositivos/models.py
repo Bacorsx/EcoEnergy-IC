@@ -1,66 +1,86 @@
 from django.db import models
-from usuarios.models import Organization, BaseModel
+from django.core.validators import MinValueValidator
+from core.models import BaseModel
 
-
-class Category(BaseModel):
-    organization = models.ForeignKey(
-        Organization, on_delete=models.CASCADE, related_name="categories"
-    )
-    name = models.CharField(max_length=100)
-    description = models.CharField(max_length=255, null=True, blank=True)
+class Organization(BaseModel):
+    name  = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(blank=True, null=True)
 
     class Meta:
-        db_table = "categories"
-        constraints = [
-            models.UniqueConstraint(fields=["organization", "name"], name="uq_categories_org_name"),
-        ]
+        db_table = "organization"
+        verbose_name = "Organization"
+        verbose_name_plural = "Organizations"
+        ordering = ["name"]
+        indexes = [models.Index(fields=["name"])]
 
     def __str__(self):
         return self.name
 
 
 class Zone(BaseModel):
+    name = models.CharField(max_length=100)
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name="zones"
     )
-    name = models.CharField(max_length=100)
-    description = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
-        db_table = "zones"
-        constraints = [
-            models.UniqueConstraint(fields=["organization", "name"], name="uq_zones_org_name"),
+        db_table = "zone"
+        unique_together = (("organization", "name"),)
+        ordering = ["name"]
+        indexes = [
+            models.Index(fields=["organization", "name"]),
+            models.Index(fields=["organization"]),
         ]
 
     def __str__(self):
         return self.name
 
 
-class DeviceStatus(models.TextChoices):
-    ACTIVE = "active", "Active"
-    INACTIVE = "inactive", "Inactive"
-    MAINTENANCE = "maintenance", "Maintenance"
+class Category(BaseModel):
+    name = models.CharField(max_length=100)
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name="categories"
+    )
+
+    class Meta:
+        db_table = "category"
+        unique_together = (("organization", "name"),)
+        ordering = ["name"]
+        indexes = [
+            models.Index(fields=["organization", "name"]),
+            models.Index(fields=["organization"]),
+        ]
+
+    def __str__(self):
+        return self.name
 
 
 class Device(BaseModel):
-    organization = models.ForeignKey(
+    STATUS = (("ONLINE", "Online"), ("OFFLINE", "Offline"))
+    status = models.CharField(max_length=10, choices=STATUS, default="ONLINE")
+    name          = models.CharField(max_length=120)
+    model         = models.CharField(max_length=120, blank=True, null=True)
+    serial_number = models.CharField(max_length=120, blank=True, null=True)
+    installed_at  = models.DateTimeField(blank=True, null=True)
+
+    category      = models.ForeignKey(
+        Category, on_delete=models.PROTECT, related_name="devices"
+    )
+    zone          = models.ForeignKey(
+        Zone, on_delete=models.PROTECT, related_name="devices"
+    )
+    organization  = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name="devices"
     )
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="devices")
-    zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name="devices")
-    name = models.CharField(max_length=120)
-    model = models.CharField(max_length=120, null=True, blank=True)
-    serial_number = models.CharField(max_length=120, null=True, blank=True)
-    status = models.CharField(
-        max_length=12, choices=DeviceStatus.choices, default=DeviceStatus.ACTIVE
-    )
-    installed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        db_table = "devices"
-        constraints = [
-            models.UniqueConstraint(fields=["organization", "name"], name="uq_devices_org_name"),
-            models.UniqueConstraint(fields=["organization", "serial_number"], name="uq_devices_org_serial"),
+        db_table = "device"
+        unique_together = (("organization", "name"),)  # o ("organization","serial_number")
+        ordering = ["name"]
+        indexes = [
+            models.Index(fields=["organization"]),
+            models.Index(fields=["category"]),
+            models.Index(fields=["zone"]),
         ]
 
     def __str__(self):
@@ -68,42 +88,57 @@ class Device(BaseModel):
 
 
 class Measurement(BaseModel):
+    value        = models.FloatField(validators=[MinValueValidator(0.0)])
+    unit         = models.CharField(max_length=20)
+    measured_at  = models.DateTimeField()
+
+    device       = models.ForeignKey(
+        Device, on_delete=models.CASCADE, related_name="measurements"
+    )
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name="measurements"
     )
-    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name="measurements")
-    measured_at = models.DateTimeField()
-    value = models.FloatField()
-    unit = models.CharField(max_length=30, default="kWh")
 
     class Meta:
-        db_table = "measurements"
-        ordering = ["-measured_at"]
+        db_table = "measurement"
+        ordering = ["-measured_at"]  # HU4: orden desc
+        indexes = [
+            models.Index(fields=["device"]),
+            models.Index(fields=["organization"]),
+            models.Index(fields=["-measured_at"]),
+        ]
+        constraints = [
+            models.CheckConstraint(check=models.Q(value__gte=0), name="measurement_value_gte_0"),
+        ]
 
     def __str__(self):
-        return f"{self.device.name} - {self.value}{self.unit}"
-
-
-class AlertSeverity(models.TextChoices):
-    CRITICAL = "critical", "Critical"
-    HIGH = "high", "High"
-    MEDIUM = "medium", "Medium"
+        return f"{self.device} @ {self.measured_at:%Y-%m-%d %H:%M}"
 
 
 class Alert(BaseModel):
+    SEVERITIES = (("GRAVE", "Grave"), ("ALTO", "Alto"), ("MEDIANO", "Mediano"))
+
+    severity     = models.CharField(max_length=10, choices=SEVERITIES)
+    message      = models.TextField()
+    is_resolved  = models.BooleanField(default=False)
+    resolved_at  = models.DateTimeField(blank=True, null=True)
+
+    device       = models.ForeignKey(
+        Device, on_delete=models.CASCADE, related_name="alerts"
+    )
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name="alerts"
     )
-    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name="alerts")
-    severity = models.CharField(max_length=8, choices=AlertSeverity.choices)
-    message = models.CharField(max_length=255)
-    is_resolved = models.BooleanField(default=False)
-    resolved_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        db_table = "alerts"
+        db_table = "alert"
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["organization"]),
+            models.Index(fields=["device"]),
+            models.Index(fields=["severity"]),
+            models.Index(fields=["is_resolved"]),
+        ]
 
     def __str__(self):
-        return f"{self.severity.upper()} - {self.device.name}"
-
+        return f"{self.get_severity_display()} - {self.device}"

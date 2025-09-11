@@ -4,11 +4,12 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
+from django.contrib.auth.decorators import login_required
 
 from .models import Device, Measurement, Alert, Category, Zone
 from .forms import DeviceForm
 
-
+@login_required
 def dashboard(request):
     # Filtros de tarjetas inferiores (dispositivos)
     cat = request.GET.get("category") or ""
@@ -73,6 +74,7 @@ def dashboard(request):
     }
     return render(request, "dispositivos/dashboard.html", context)
 
+@login_required
 def device_list(request):
     cat = request.GET.get("category") or ""
     zon = request.GET.get("zone") or ""
@@ -99,6 +101,7 @@ def device_list(request):
         "q": q,
     })
 
+@login_required
 def device_detail(request, pk):
     device = get_object_or_404(Device, pk=pk)
     measurements = device.measurements.order_by("-measured_at")[:20]
@@ -107,6 +110,7 @@ def device_detail(request, pk):
         "device": device, "measurements": measurements, "alerts": alerts
     })
 
+@login_required
 def device_create(request):
     form = DeviceForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -115,6 +119,7 @@ def device_create(request):
         return redirect("device_list")
     return render(request, "dispositivos/device_form.html", {"form": form, "title": "Nuevo dispositivo"})
 
+@login_required
 def device_update(request, pk):
     device = get_object_or_404(Device, pk=pk)
     form = DeviceForm(request.POST or None, instance=device)
@@ -124,6 +129,7 @@ def device_update(request, pk):
         return redirect("device_detail", pk=device.pk)
     return render(request, "dispositivos/device_form.html", {"form": form, "title": "Editar dispositivo"})
 
+@login_required
 def device_delete(request, pk):
     device = get_object_or_404(Device, pk=pk)
     if request.method == "POST":
@@ -132,10 +138,17 @@ def device_delete(request, pk):
         return redirect("device_list")
     return render(request, "dispositivos/device_confirm_delete.html", {"device": device})
 
+@login_required
 def measurement_list(request):
     qs = Measurement.objects.select_related("device").order_by("-measured_at")[:100]
-    return render(request, "dispositivos/measurement_list.html", {"measurements": qs})
+    paginator = Paginator(qs, 50) # 50 por página
+    page = request.GET.get("page")
+    measurements = paginator.get_page(page)
+    return render(request, "dispositivos/measurement_list.html", {
+        "measurements": measurements,
+    })
 
+@login_required
 def alert_list(request):
     qs = Alert.objects.select_related("device").order_by("-created_at")[:100]
     return render(request, "dispositivos/alert_list.html", {"alerts": qs})
