@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ zone.name }} · EcoEnergy{% endblock %}
+{% block content %}
+
+<a class="back" href="{% url 'dispositivos:zone_list' %}">Volver a zonas</a>
+<h2>{{ zone.name }}</h2>
+
+<div class="grid halves">
+  <section class="card">
+    <h3>Información de la Zona</h3>
+    <table class="table">
+      <tr>
+        <td><strong>Nombre:</strong></td>
+        <td>{{ zone.name }}</td>
+      </tr>
+      <tr>
+        <td><strong>Organización:</strong></td>
+        <td>{{ zone.organization.name }}</td>
+      </tr>
+      <tr>
+        <td><strong>Creada:</strong></td>
+        <td>{{ zone.created_at|date:"d/m/Y H:i" }}</td>
+      </tr>
+      <tr>
+        <td><strong>Última actualización:</strong></td>
+        <td>{{ zone.updated_at|date:"d/m/Y H:i" }}</td>
+      </tr>
+    </table>
+  </section>
+
+  <section class="card">
+    <h3>Estadísticas</h3>
+    <ul class="list">
+      <li>
+        <span>Total dispositivos:</span>
+        <span class="badge">{{ devices.count }}</span>
+      </li>
+      <li>
+        <span>Total productos:</span>
+        <span class="badge">{{ zone.devices.all|length }}</span>
+      </li>
+    </ul>
+  </section>
+</div>
+
+<section class="card">
+  <div class="card-head">
+    <h3>Dispositivos en esta Zona</h3>
+    <a href="{% url 'dispositivos:device_list' %}?zone={{ zone.pk }}">Ver todos</a>
+  </div>
+  
+  {% if devices %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Serie</th>
+          <th>Productos</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for device in devices %}
+          <tr>
+            <td>
+              <a href="{% url 'dispositivos:device_detail' device.pk %}" class="name">{{ device.name }}</a>
+            </td>
+            <td>{{ device.serial_number|default:"-" }}</td>
+            <td>{{ device.products.count }}</td>
+            <td>
+              <a class="btn btn-light" href="{% url 'dispositivos:device_detail' device.pk %}">Ver</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">No hay dispositivos en esta zona.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

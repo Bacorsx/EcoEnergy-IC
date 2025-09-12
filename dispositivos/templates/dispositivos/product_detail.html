@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} · EcoEnergy{% endblock %}
+{% block content %}
+
+<a class="back" href="{% url 'dispositivos:product_list' %}">Volver a productos</a>
+<h2>{{ product.name }}</h2>
+
+<div class="grid halves">
+  <section class="card">
+    <h3>Información del Producto</h3>
+    <table class="table">
+      <tr>
+        <td><strong>Nombre:</strong></td>
+        <td>{{ product.name }}</td>
+      </tr>
+      <tr>
+        <td><strong>Modelo:</strong></td>
+        <td>{{ product.model|default:"No especificado" }}</td>
+      </tr>
+      <tr>
+        <td><strong>Número de Serie:</strong></td>
+        <td>{{ product.serial_number|default:"No especificado" }}</td>
+      </tr>
+      <tr>
+        <td><strong>Categoría:</strong></td>
+        <td>{{ product.category.name }}</td>
+      </tr>
+      <tr>
+        <td><strong>Dispositivo:</strong></td>
+        <td>
+          {% if product.device %}
+            <a href="{% url 'dispositivos:device_detail' product.device.pk %}">{{ product.device.name }}</a>
+            <br>
+            <small class="muted">
+              {% if product.device.zone %}{{ product.device.zone.name }}{% else %}—{% endif %}
+            </small>
+          {% else %}
+            —
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Organización:</strong></td>
+        <td>
+          {% if product.device and product.device.organization %}
+            {{ product.device.organization.name }}
+          {% else %}
+            —
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Creado:</strong></td>
+        <td>{{ product.created_at|date:"d/m/Y H:i" }}</td>
+      </tr>
+      <tr>
+        <td><strong>Última actualización:</strong></td>
+        <td>{{ product.updated_at|date:"d/m/Y H:i" }}</td>
+      </tr>
+    </table>
+
+    <div class="mt-16">
+      <a class="btn btn-primary" href="{% url 'dispositivos:product_update' product.pk %}">Editar producto</a>
+      <a class="btn btn-secondary" href="{% url 'dispositivos:product_delete' product.pk %}">Eliminar producto</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>Estadísticas</h3>
+    <ul class="list">
+      <li>
+        <span>Total de mediciones:</span>
+        <span class="badge">{{ product.measurements.count }}</span>
+      </li>
+      <li>
+        <span>Alertas activas:</span>
+        <span class="badge">{{ alerts_active_count }}</span>
+      </li>
+      <li>
+        <span>Última medición:</span>
+        <span class="muted">
+          {% if product.measurements.first %}
+            {{ product.measurements.first.measured_at|date:"d/m/Y H:i" }}
+          {% else %}
+            Sin mediciones
+          {% endif %}
+        </span>
+      </li>
+    </ul>
+  </section>
+</div>
+
+<div class="grid halves">
+  <section class="card">
+    <div class="card-head">
+      <h3>Últimas Mediciones</h3>
+      <a href="{% url 'dispositivos:measurement_list' %}?product={{ product.pk }}">Ver todas</a>
+    </div>
+    {% if measurements and measurements|length %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Fecha/Hora</th>
+            <th>Valor</th>
+            <th>Unidad</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for measurement in measurements %}
+            <tr>
+              <td>{{ measurement.measured_at|date:"d/m/Y H:i" }}</td>
+              <td>{{ measurement.value }}</td>
+              <td>{{ measurement.unit }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No hay mediciones registradas para este producto.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h3>Alertas Recientes</h3>
+    </div>
+    {% if alerts and alerts|length %}
+      <ul class="alerts">
+        {% for alert in alerts %}
+          <li>
+            <div class="row">
+              <span class="pill {% if alert.severity == 'GRAVE' %}danger{% elif alert.severity == 'ALTO' %}warn{% else %}muted{% endif %}">
+                {{ alert.get_severity_display }}
+              </span>
+              <span class="muted">{{ alert.created_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            <p>{{ alert.message }}</p>
+            {% if alert.is_resolved %}
+              <small class="muted">Resuelta el {{ alert.resolved_at|date:"d/m/Y H:i" }}</small>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No hay alertas para este producto.</p>
+    {% endif %}
+  </section>
+</div>
+
+{% endblock %}

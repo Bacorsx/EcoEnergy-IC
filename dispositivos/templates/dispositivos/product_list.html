@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Productos{% endblock %}
+
+{% block content %}
+<h2>Listado de Productos</h2>
+
+<form method="get" class="filters">
+  <label for="category">Categoría</label>
+  <select name="category" id="category">
+    <option value="">Todas</option>
+    {% for c in categories %}
+      <option value="{{ c.id }}" {% if cat_selected|stringformat:"s" == c.id|stringformat:"s" %}selected{% endif %}>
+        {{ c.name }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <label for="device">Dispositivo</label>
+  <select name="device" id="device">
+    <option value="">Todos</option>
+    {% for d in devices %}
+      <option value="{{ d.id }}" {% if device_selected|stringformat:"s" == d.id|stringformat:"s" %}selected{% endif %}>
+        {{ d.name }} — {{ d.zone.name }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <label for="q">Buscar</label>
+  <input type="text" name="q" id="q" placeholder="Nombre de producto…" value="{{ q|default_if_none:'' }}"/>
+
+  <button class="btn btn-dark" type="submit">Filtrar</button>
+  <a class="btn btn-light" href="{% url 'dispositivos:product_list' %}">Limpiar</a>
+</form>
+
+<section class="card">
+  {% if is_empty_products %}
+    <p>Sin datos</p>
+  {% else %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Dispositivo</th>
+          <th>Zona</th>
+          <th>Categoría</th>
+          <th>Serie</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+          <tr>
+            <td>{{ p.name }}</td>
+
+            <!-- ✅ Dispositivo tolerante a None -->
+            <td>
+              {% if p.device %}
+                {{ p.device.name }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+
+            <!-- ✅ Zona tolerante a None -->
+            <td>
+              {% if p.device and p.device.zone %}
+                {{ p.device.zone.name }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+
+            <td>{{ p.category.name }}</td>
+            <td>{{ p.serial_number|default:"—" }}</td>
+            <td>
+              <a class="btn btn-light" href="{% url 'dispositivos:product_detail' p.pk %}">Ver detalle</a>
+              {% if p.device %}
+                <a class="btn btn-light" href="{% url 'dispositivos:device_detail' p.device.pk %}">Ver dispositivo</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">Sin datos</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if products.paginator.num_pages > 1 %}
+    <div class="pagination">
+      {% if products.has_previous %}
+        <a href="?page={{ products.previous_page_number }}&category={{ cat_selected }}&device={{ device_selected }}&q={{ q }}">Anterior</a>
+      {% endif %}
+      <span>Página {{ products.number }} de {{ products.paginator.num_pages }}</span>
+      {% if products.has_next %}
+        <a href="?page={{ products.next_page_number }}&category={{ cat_selected }}&device={{ device_selected }}&q={{ q }}">Siguiente</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Eliminar Producto · EcoEnergy{% endblock %}
+{% block content %}
+
+<a class="back" href="{% url 'dispositivos:product_detail' product.pk %}">Volver al producto</a>
+
+<h2>Confirmar Eliminación</h2>
+
+<section class="card">
+  <div class="text-center p-20">
+    <div class="warning-icon">⚠️</div>
+    <h3>¿Estás seguro de que quieres eliminar este producto?</h3>
+    <p class="muted">Esta acción no se puede deshacer.</p>
+  </div>
+
+  <div class="grid halves">
+    <section class="card">
+      <h3>Información del Producto</h3>
+      <table class="table">
+        <tr>
+          <td><strong>Nombre:</strong></td>
+          <td>{{ product.name }}</td>
+        </tr>
+        <tr>
+          <td><strong>Modelo:</strong></td>
+          <td>{{ product.model|default:"No especificado" }}</td>
+        </tr>
+        <tr>
+          <td><strong>Número de Serie:</strong></td>
+          <td>{{ product.serial_number|default:"No especificado" }}</td>
+        </tr>
+        <tr>
+          <td><strong>Categoría:</strong></td>
+          <td>{{ product.category.name }}</td>
+        </tr>
+        <tr>
+          <td><strong>Dispositivo:</strong></td>
+          <td>{{ product.device.name }} ({{ product.device.zone.name }})</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h3>Impacto de la Eliminación</h3>
+      <ul class="list">
+        <li>
+          <span>Mediciones asociadas:</span>
+          <span class="badge">{{ product.measurements.count }}</span>
+        </li>
+        <li>
+          <span>Alertas asociadas:</span>
+          <span class="badge">{{ product.alerts.count }}</span>
+        </li>
+        <li>
+          <span>Reglas de alerta:</span>
+          <span class="badge">{{ product.measurementalertrule_set.count }}</span>
+        </li>
+      </ul>
+      
+      {% if product.measurements.count > 0 or product.alerts.count > 0 %}
+        <div class="warning-box">
+          <strong>⚠️ Advertencia:</strong>
+          <p>
+            Este producto tiene {{ product.measurements.count }} mediciones y {{ product.alerts.count }} alertas asociadas. 
+            Al eliminar el producto, estos datos también se eliminarán.
+          </p>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+
+  <div class="mt-24 text-center">
+    <form method="post" class="inline-flex">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">
+        Sí, eliminar producto
+      </button>
+    </form>
+    <a class="btn btn-secondary ml-12" href="{% url 'dispositivos:product_detail' product.pk %}">
+      Cancelar
+    </a>
+  </div>
+</section>
+
+{% endblock %}

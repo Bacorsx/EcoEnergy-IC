@@ -1,25 +1,20 @@
-{% extends "base.html" %}
-{% block title %}Usuarios{% endblock %}
-{% block content %}
-<h2>Lista de usuarios</h2>
-<table class="table">
-  <thead>
+<thead>
+  <tr>
+    <th>Usuario</th>
+    <th>Email</th>
+    <th>Organización</th>
+    <th>Rol</th>
+  </tr>
+</thead>
+<tbody>
+  {% for u in users %}
     <tr>
-      <th>Usuario</th>
-      <th>Email</th>
-      <th>Organización</th>
+      <td><a href="{% url 'user_detail' u.id %}">{{ u.username }}</a></td>
+      <td>{{ u.email }}</td>
+      <td>{{ u.organization }}</td>
+      <td>{{ u.role|default:"—" }}</td>
     </tr>
-  </thead>
-  <tbody>
-    {% for u in users %}
-      <tr>
-        <td><a href="{% url 'user_detail' u.id %}">{{ u.username }}</a></td>
-        <td>{{ u.email }}</td>
-        <td>{{ u.organization }}</td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="3">No hay usuarios registrados.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
-{% endblock %}
+  {% empty %}
+    <tr><td colspan="4">No hay usuarios registrados.</td></tr>
+  {% endfor %}
+</tbody>

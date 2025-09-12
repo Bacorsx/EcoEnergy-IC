@@ -1,18 +1,80 @@
 {% extends "base.html" %}
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title }} · EcoEnergy{% endblock %}
 {% block content %}
+
+<a class="back" href="{% if device %}{% url 'dispositivos:device_detail' device.pk %}{% else %}{% url 'dispositivos:device_list' %}{% endif %}">
+  Volver {% if device %}al dispositivo{% else %}a dispositivos{% endif %}
+</a>
+
 <h2>{{ title }}</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.non_field_errors }}
-  {% for field in form %}
-    <div class="field">
-      <label>{{ field.label }}{% if field.field.required %}*{% endif %}</label>
-      {{ field }}
-      {% if field.errors %}<div class="error">{{ field.errors|striptags }}</div>{% endif %}
+
+<section class="card">
+  <form method="post">
+    {% csrf_token %}
+
+    {# opcional: si organization viene en el form, lo ocultamos #}
+    {% if form.organization %}
+      <div style="display:none">{{ form.organization }}</div>
+    {% endif %}
+
+    <div class="grid halves">
+      <div>
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        {{ form.name }}
+        {% if form.name.errors %}<div class="error">{{ form.name.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div>
+        <label for="{{ form.serial_number.id_for_label }}">{{ form.serial_number.label }}</label>
+        {{ form.serial_number }}
+        {% if form.serial_number.errors %}<div class="error">{{ form.serial_number.errors.0 }}</div>{% endif %}
+      </div>
     </div>
-  {% endfor %}
-  <button type="submit">Guardar</button>
-  <a href="{% url 'device_list' %}">Cancelar</a>
-</form>
+
+    <div class="grid halves">
+      <div>
+        <label for="{{ form.installed_at.id_for_label }}">{{ form.installed_at.label }}</label>
+        {{ form.installed_at }}
+        {% if form.installed_at.errors %}<div class="error">{{ form.installed_at.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div>
+        <label for="{{ form.zone.id_for_label }}">{{ form.zone.label }}</label>
+        {{ form.zone }}
+        {% if form.zone.errors %}<div class="error">{{ form.zone.errors.0 }}</div>{% endif %}
+      </div>
+    </div>
+
+    {# 🔹 AQUI el multiselect de productos existentes #}
+    <div class="mt-20">
+      <label for="{{ form.products.id_for_label }}">{{ form.products.label }}</label>
+      <small class="muted d-block" style="margin-bottom:6px">
+        {{ form.products.help_text }}
+      </small>
+      {{ form.products }}
+      {% if form.products.errors %}<div class="error">{{ form.products.errors.0 }}</div>{% endif %}
+    </div>
+
+    <div class="mt-20">
+      <button type="submit" class="btn btn-primary">
+        {% if device %}Actualizar Dispositivo{% else %}Crear Dispositivo{% endif %}
+      </button>
+      <a class="btn btn-secondary" href="{% if device %}{% url 'dispositivos:device_detail' device.pk %}{% else %}{% url 'dispositivos:device_list' %}{% endif %}">
+        Cancelar
+      </a>
+    </div>
+  </form>
+</section>
+
+{% if device %}
+<section class="card">
+  <h3>Información Adicional</h3>
+  <table class="table">
+    <tr><td><strong>Creado:</strong></td><td>{{ device.created_at|date:"d/m/Y H:i" }}</td></tr>
+    <tr><td><strong>Última actualización:</strong></td><td>{{ device.updated_at|date:"d/m/Y H:i" }}</td></tr>
+    <tr><td><strong>Total productos:</strong></td><td>{{ device.products.count }}</td></tr>
+  </table>
+</section>
+{% endif %}
+
 {% endblock %}

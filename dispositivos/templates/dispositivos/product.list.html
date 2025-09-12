@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Productos · EcoEnergy{% endblock %}
+{% block content %}
+
+<a class="back" href="{% url 'dispositivos:dashboard' %}">Volver al dashboard</a>
+<h2>PRODUCTOS</h2>
+
+<form method="get" class="filters row">
+  <div>
+    <label>Categoría</label>
+    <select name="category">
+      <option value="">Todas</option>
+      {% for c in categories %}
+        <option value="{{ c.id }}" {% if cat_selected|stringformat:"s" == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>Dispositivo</label>
+    <select name="device">
+      <option value="">Todos</option>
+      {% for d in devices %}
+        <option value="{{ d.id }}" {% if device_selected|stringformat:"s" == d.id|stringformat:"s" %}selected{% endif %}>{{ d.name }} ({{ d.zone.name }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="grow">
+    <label>Buscar</label>
+    <input type="text" name="q" placeholder="Nombre de producto" value="{{ q }}">
+  </div>
+  <button class="btn btn-dark" type="submit">Aplicar filtros</button>
+</form>
+
+<section class="card">
+  <div class="card-head">
+    <h3>Listado de productos</h3>
+    <a class="btn btn-primary" href="{% url 'dispositivos:product_create' %}">Nuevo producto</a>
+  </div>
+  
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Modelo</th>
+        <th>Dispositivo</th>
+        <th>Categoría</th>
+        <th>Serie</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in products %}
+        <tr>
+          <td>
+            <a href="{% url 'dispositivos:product_detail' product.pk %}" class="name">{{ product.name }}</a>
+          </td>
+          <td>{{ product.model|default:"-" }}</td>
+          <td>
+            <a href="{% url 'dispositivos:device_detail' product.device.pk %}">{{ product.device.name }}</a>
+            <br><small class="muted">{{ product.device.zone.name }}</small>
+          </td>
+          <td>{{ product.category.name }}</td>
+          <td>{{ product.serial_number|default:"-" }}</td>
+          <td>
+            <a class="btn btn-light" href="{% url 'dispositivos:product_detail' product.pk %}">Ver</a>
+            <a class="btn btn-light" href="{% url 'dispositivos:product_update' product.pk %}">Editar</a>
+            <a class="btn btn-light" href="{% url 'dispositivos:product_delete' product.pk %}">Eliminar</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">No hay productos con estos filtros</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if products.paginator.num_pages > 1 %}
+  <div class="pagination">
+    {% if products.has_previous %}
+      <a href="?page={{ products.previous_page_number }}&category={{ cat_selected }}&device={{ device_selected }}&q={{ q }}">Anterior</a>
+    {% endif %}
+    <span>Página {{ products.number }} de {{ products.paginator.num_pages }}</span>
+    {% if products.has_next %}
+      <a href="?page={{ products.next_page_number }}&category={{ cat_selected }}&device={{ device_selected }}&q={{ q }}">Siguiente</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</section>
+
+{% endblock %}
