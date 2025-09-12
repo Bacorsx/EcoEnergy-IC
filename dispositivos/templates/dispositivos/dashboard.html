@@ -24,11 +24,10 @@
   <section class="card">
     <h3>ALERTAS DE LA SEMANA</h3>
     <div class="tags">
-      <span class="tag tag-danger">Grave: {{ sev_map.critical }}</span>
-      <span class="tag tag-warn">Alto: {{ sev_map.high }}</span>
-      <span class="tag tag-muted">Mediano: {{ sev_map.medium }}</span>
+      <span class="tag tag-danger">Grave: {{ sev_map.GRAVE }}</span>
+      <span class="tag tag-warn">Alto: {{ sev_map.ALTO }}</span>
+      <span class="tag tag-muted">Mediano: {{ sev_map.MEDIANO }}</span>
     </div>
-    <small>* Criterios de severidad configurables por dispositivo.</small>
   </section>
 </div>
 
@@ -36,19 +35,28 @@
   <section class="card">
     <div class="card-head">
       <h3>ÚLTIMAS 10 MEDICIONES</h3>
-      <a href="{% url 'measurement_list' %}">Ver todas</a>
+      <a href="{% url 'dispositivos:measurement_list' %}">Ver todas</a>
     </div>
     <table class="table">
-      <thead><tr><th>Fecha/Hora</th><th>Dispositivo</th><th>Valor</th></tr></thead>
+      <thead>
+        <tr><th>Fecha/Hora</th><th>Dispositivo</th><th>Producto</th><th>Valor</th></tr>
+      </thead>
       <tbody>
       {% for m in last_measurements %}
         <tr>
-          <td>{{ m.measured_at }}</td>
-          <td><a href="{% url 'device_detail' m.device.pk %}">{{ m.device.name }}</a></td>
+          <td>{{ m.measured_at|date:"d/m/Y H:i" }}</td>
+          <td>
+            {% if m.product and m.product.device %}
+              <a href="{% url 'dispositivos:device_detail' m.product.device.pk %}">{{ m.product.device.name }}</a>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>{{ m.product.name }}</td>
           <td>{{ m.value }} {{ m.unit }}</td>
         </tr>
       {% empty %}
-        <tr><td colspan="3">Sin mediciones</td></tr>
+        <tr><td colspan="4">Sin mediciones</td></tr>
       {% endfor %}
       </tbody>
     </table>
@@ -57,20 +65,29 @@
   <section class="card">
     <div class="card-head">
       <h3>ALERTAS RECIENTES</h3>
-      <a href="{% url 'alert_list' %}">Ver todas</a>
+      <a href="{% url 'dispositivos:alert_list' %}">Ver todas</a>
     </div>
     <ul class="alerts">
-      {% for a in recent_alerts %}
+      {% for m in recent_alerts_ms %}
         <li>
-          <a href="{% url 'device_detail' a.device.pk %}">{{ a.device.name }}</a>
           <div class="row">
-            <span class="pill {% if a.severity == 'critical' %}danger{% elif a.severity == 'high' %}warn{% else %}muted{% endif %}">
-              {{ a.severity|title }}
+            <span class="pill {% if m.product_alert.alert.severity == 'GRAVE' %}danger{% elif m.product_alert.alert.severity == 'ALTO' %}warn{% else %}muted{% endif %}">
+              {{ m.product_alert.alert.get_severity_display }}
             </span>
-            <span class="muted">{{ a.message }}</span>
+            <span class="muted">{{ m.created_at|date:"d/m/Y H:i" }}</span>
+          </div>
+          <div>
+            {% if m.product_alert.product.device %}
+              <a href="{% url 'dispositivos:device_detail' m.product_alert.product.device.pk %}">
+                {{ m.product_alert.product.device.name }}
+              </a>
+            {% else %}—{% endif %}
+            · {{ m.product_alert.product.name }} · {{ m.measurement.value }} {{ m.measurement.unit }}
           </div>
         </li>
-      {% empty %}<li>Sin alertas</li>{% endfor %}
+      {% empty %}
+        <li>Sin alertas</li>
+      {% endfor %}
     </ul>
   </section>
 </div>
@@ -78,7 +95,7 @@
 <section class="card">
   <div class="card-head">
     <h3>DISPOSITIVOS</h3>
-    <a href="{% url 'device_list' %}">Ir a listado</a>
+    <a href="{% url 'dispositivos:device_list' %}">Ir a listado</a>
   </div>
 
   <form method="get" class="filters">
@@ -102,8 +119,8 @@
   <div class="cards">
     {% for d in device_cards %}
       <article class="device-card">
-        <a href="{% url 'device_detail' d.pk %}" class="name">{{ d.name }}</a>
-        <div class="meta">{{ d.category.name }} · {{ d.zone.name }}</div>
+        <a href="{% url 'dispositivos:device_detail' d.pk %}" class="name">{{ d.name }}</a>
+        <div class="meta">{{ d.zone.name }}</div>
       </article>
     {% empty %}
       <div class="muted">No hay dispositivos con estos filtros.</div>

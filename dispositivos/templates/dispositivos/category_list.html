@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Categorías · EcoEnergy{% endblock %}
+{% block content %}
+
+<a class="back" href="{% url 'dispositivos:dashboard' %}">Volver al dashboard</a>
+<h2>CATEGORÍAS</h2>
+
+<section class="card">
+  <div class="card-head">
+    <h3>Listado de categorías</h3>
+    <a class="btn btn-primary" href="{% url 'dispositivos:category_create' %}">Nueva categoría</a>
+  </div>
+  
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Productos</th>
+        <th>Creada</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for category in categories %}
+        <tr>
+          <td>
+            <a href="{% url 'dispositivos:category_detail' category.pk %}" class="name">{{ category.name }}</a>
+          </td>
+          <td>
+            <span class="badge">{{ category.product_count }}</span>
+          </td>
+          <td>{{ category.created_at|date:"d/m/Y" }}</td>
+          <td>
+            <a class="btn btn-light" href="{% url 'dispositivos:category_detail' category.pk %}">Ver</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">No hay categorías registradas</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% endblock %}

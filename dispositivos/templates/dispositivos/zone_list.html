@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Zonas · EcoEnergy{% endblock %}
+{% block content %}
+
+<a class="back" href="{% url 'dispositivos:dashboard' %}">Volver al dashboard</a>
+<h2>ZONAS</h2>
+
+<section class="card">
+  <div class="card-head">
+    <h3>Listado de zonas</h3>
+    <a class="btn btn-primary" href="{% url 'dispositivos:zone_create' %}">Nueva zona</a>
+  </div>
+  
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Organización</th>
+        <th>Dispositivos</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for zone in zones %}
+        <tr>
+          <td>
+            <a href="{% url 'dispositivos:zone_detail' zone.pk %}" class="name">{{ zone.name }}</a>
+          </td>
+          <td>{{ zone.organization.name }}</td>
+          <td>{{ zone.devices.count }}</td>
+          <td>
+            <a class="btn btn-light" href="{% url 'dispositivos:zone_detail' zone.pk %}">Ver</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">No hay zonas registradas</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% endblock %}

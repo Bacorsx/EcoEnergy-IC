@@ -1,34 +1,97 @@
 {% extends "base.html" %}
-{% block title %}Detalle{% endblock %}
+{% block title %}{{ device.name }} · EcoEnergy{% endblock %}
 {% block content %}
+
+<a class="back" href="{% url 'dispositivos:device_list' %}">Volver a dispositivos</a>
 <h2>{{ device.name }}</h2>
-<p>
-  Categoría: {{ device.category.name }} |
-  Zona: {{ device.zone.name }}
-</p>
-<p>Modelo: {{ device.model }} | Serie: {{ device.serial_number }}</p>
 
-<a href="{% url 'device_update' device.pk %}">Editar</a>
-<form method="post" action="{% url 'device_delete' device.pk %}" style="display:inline" onsubmit="return confirm('¿Eliminar este dispositivo?');">
-  {% csrf_token %}
-  <button type="submit">Eliminar</button>
-</form>
+<div class="grid halves">
+  <section class="card">
+    <h3>Información del Dispositivo</h3>
+    <table class="table">
+      <tr>
+        <td><strong>Nombre:</strong></td>
+        <td>{{ device.name }}</td>
+      </tr>
+      <tr>
+        <td><strong>Número de Serie:</strong></td>
+        <td>{{ device.serial_number|default:"No especificado" }}</td>
+      </tr>
+      <tr>
+        <td><strong>Fecha de Instalación:</strong></td>
+        <td>{{ device.installed_at|date:"d/m/Y H:i"|default:"No especificada" }}</td>
+      </tr>
+      <tr>
+        <td><strong>Zona:</strong></td>
+        <td>{{ device.zone.name }}</td>
+      </tr>
+      <tr>
+        <td><strong>Organización:</strong></td>
+        <td>{{ device.organization.name }}</td>
+      </tr>
+      <tr>
+        <td><strong>Creado:</strong></td>
+        <td>{{ device.created_at|date:"d/m/Y H:i" }}</td>
+      </tr>
+    </table>
+    
+    <div class="mt-16">
+      <a class="btn btn-primary" href="{% url 'dispositivos:device_update' device.pk %}">Editar dispositivo</a>
+      <a class="btn btn-secondary" href="{% url 'dispositivos:device_delete' device.pk %}">Eliminar dispositivo</a>
+    </div>
+  </section>
 
-<h3>Últimas Mediciones</h3>
-<ul>
-  {% for m in measurements %}
-    <li>{{ m.measured_at }} → {{ m.value }} {{ m.unit }}</li>
-  {% empty %}
-    <li>Sin mediciones</li>
-  {% endfor %}
-</ul>
+  <section class="card">
+    <h3>Estadísticas</h3>
+    <ul class="list">
+      <li>
+        <span>Total productos:</span>
+        <span class="badge">{{ products.count }}</span>
+      </li>
+      <li>
+        <span>Total mediciones:</span>
+        <span class="badge">{{ products|length }}</span>
+      </li>
+    </ul>
+  </section>
+</div>
 
-<h3>Alertas</h3>
-<ul>
-  {% for a in alerts %}
-    <li>[{{ a.severity|upper }}] {{ a.message }} {% if a.is_resolved %}(resuelta){% endif %}</li>
-  {% empty %}
-    <li>Sin alertas</li>
-  {% endfor %}
-</ul>
+<section class="card">
+  <div class="card-head">
+    <h3>Productos en este Dispositivo</h3>
+    <a href="{% url 'dispositivos:product_list' %}?device={{ device.pk }}">Ver todos</a>
+  </div>
+  
+  {% if products %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Modelo</th>
+          <th>Categoría</th>
+          <th>Serie</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+          <tr>
+            <td>
+              <a href="{% url 'dispositivos:product_detail' product.pk %}" class="name">{{ product.name }}</a>
+            </td>
+            <td>{{ product.model|default:"-" }}</td>
+            <td>{{ product.category.name }}</td>
+            <td>{{ product.serial_number|default:"-" }}</td>
+            <td>
+              <a class="btn btn-light" href="{% url 'dispositivos:product_detail' product.pk %}">Ver</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">No hay productos en este dispositivo.</p>
+  {% endif %}
+</section>
+
 {% endblock %}

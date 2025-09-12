@@ -58,3 +58,103 @@
 .back{display:inline-block;margin-bottom:8px;color:#334155;text-decoration:none}
 .back:hover{text-decoration:underline}
 .pagination{display:flex;gap:10px;align-items:center;margin-top:10px}
+
+/* ========== FORMULARIOS ========== */
+.error {
+  color: var(--danger);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+form input, form select, form textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+form input:focus, form select:focus, form textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.1);
+}
+
+/* ========== BOTONES DE PELIGRO ========== */
+.btn-danger {
+  background: var(--danger) !important;
+  color: white !important;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-danger:hover {
+  background: #991b1b !important;
+}
+
+/* ========== ADVERTENCIAS ========== */
+.warning-box {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 16px;
+}
+
+.warning-box strong {
+  color: var(--danger);
+}
+
+.warning-box p {
+  margin: 8px 0 0 0;
+  color: #991b1b;
+}
+
+/* ========== ICONOS DE ADVERTENCIA ========== */
+.warning-icon {
+  font-size: 48px;
+  color: var(--danger);
+  margin-bottom: 16px;
+}
+
+/* ========== CENTRADO ========== */
+.text-center {
+  text-align: center;
+}
+
+/* ========== MARGIN UTILITIES ========== */
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+.mt-24 { margin-top: 24px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.ml-12 { margin-left: 12px; }
+
+/* ========== PADDING UTILITIES ========== */
+.p-20 { padding: 20px; }
+.px-12 { padding-left: 12px; padding-right: 12px; }
+.py-12 { padding-top: 12px; padding-bottom: 12px; }
+
+/* ========== FLEX UTILITIES ========== */
+.flex { display: flex; }
+.inline-flex { display: inline-flex; }
+.gap-12 { gap: 12px; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+
+/* ========== GRID UTILITIES ========== */
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }

@@ -1,50 +1,46 @@
 {% extends "base.html" %}
 {% block title %}Mediciones{% endblock %}
-
 {% block content %}
-<h2>Lista de Mediciones</h2>
 
-<form method="get" class="filters">
-  <label for="device">Dispositivo</label>
-  <select name="device" id="device">
-    <option value="">Todos</option>
-    {% for d in devices %}
-      <option value="{{ d.id }}" {% if device_selected|stringformat:"s" == d.id|stringformat:"s" %}selected{% endif %}>
-        {{ d.name }}
-      </option>
-    {% endfor %}
-  </select>
-
-  <label for="unit">Unidad</label>
-  <select name="unit" id="unit">
-    <option value="">Todas</option>
-    {% for u in units %}
-      <option value="{{ u }}" {% if unit_selected == u %}selected{% endif %}>{{ u }}</option>
-    {% endfor %}
-  </select>
-
-  <button class="btn btn-dark" type="submit">Filtrar</button>
-</form>
+<h2>Mediciones</h2>
 
 <table class="table">
   <thead>
     <tr>
       <th>Fecha/Hora</th>
       <th>Dispositivo</th>
+      <th>Producto</th>
       <th>Valor</th>
-      <th>Unidad</th>
+      <th>Alertas</th>
     </tr>
   </thead>
   <tbody>
     {% for m in measurements %}
       <tr>
-        <td>{{ m.measured_at }}</td>
-        <td><a href="{% url 'device_detail' m.device.pk %}">{{ m.device.name }}</a></td>
-        <td>{{ m.value }}</td>
-        <td>{{ m.unit }}</td>
+        <td>{{ m.measured_at|date:"d/m/Y H:i" }}</td>
+        <td>
+          {% if m.product.device %}
+            <a href="{% url 'dispositivos:device_detail' m.product.device.pk %}">{{ m.product.device.name }}</a>
+          {% else %}—{% endif %}
+        </td>
+        <td>{{ m.product.name }}</td>
+        <td>{{ m.value }} {{ m.unit }}</td>
+        <td>
+          {% with evs=m.alert_events.all %}
+            {% if evs %}
+              {% for ev in evs %}
+                <span class="pill {% if ev.product_alert.alert.severity == 'GRAVE' %}danger{% elif ev.product_alert.alert.severity == 'ALTO' %}warn{% else %}muted{% endif %}">
+                  {{ ev.product_alert.alert.get_severity_display }}
+                </span>{% if not forloop.last %} {% endif %}
+              {% endfor %}
+            {% else %}
+              —
+            {% endif %}
+          {% endwith %}
+        </td>
       </tr>
     {% empty %}
-      <tr><td colspan="4">No hay mediciones registradas.</td></tr>
+      <tr><td colspan="5">Sin mediciones</td></tr>
     {% endfor %}
   </tbody>
 </table>
@@ -52,12 +48,13 @@
 {% if measurements.paginator.num_pages > 1 %}
 <div class="pagination">
   {% if measurements.has_previous %}
-    <a href="?page={{ measurements.previous_page_number }}&device={{ device_selected }}&unit={{ unit_selected }}">Anterior</a>
+    <a href="?page={{ measurements.previous_page_number }}">Anterior</a>
   {% endif %}
   <span>Página {{ measurements.number }} de {{ measurements.paginator.num_pages }}</span>
   {% if measurements.has_next %}
-    <a href="?page={{ measurements.next_page_number }}&device={{ device_selected }}&unit={{ unit_selected }}">Siguiente</a>
+    <a href="?page={{ measurements.next_page_number }}">Siguiente</a>
   {% endif %}
 </div>
 {% endif %}
+
 {% endblock %}

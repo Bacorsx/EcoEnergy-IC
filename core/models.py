@@ -1,3 +1,4 @@
+# core/models.py
 from django.db import models
 from django.utils import timezone
 
@@ -10,7 +11,7 @@ class SoftDeleteQuerySet(models.QuerySet):
         return super().update(deleted_at=timezone.now(), estado="INACTIVO")
 
     def hard_delete(self):
-        # Borrado físico (¡cuidado!)
+        # Borrado físico 
         return super().delete()
 
     def alive(self):
@@ -28,7 +29,7 @@ class SoftDeleteManager(models.Manager):
     def get_queryset(self):
         return SoftDeleteQuerySet(self.model, using=self._db).alive()
 
-    # Acceso conveniente a QuerySet con utilidades
+    # Accesos convenientes
     def with_deleted(self):
         return SoftDeleteQuerySet(self.model, using=self._db)
 
@@ -37,7 +38,7 @@ class SoftDeleteManager(models.Manager):
 
 
 class AllObjectsManager(models.Manager):
-    """Manager alterno: incluye vivos y eliminados (para auditoría/hard_delete)."""
+    """Manager alterno: incluye vivos y eliminados (auditoría/hard_delete)."""
     def get_queryset(self):
         return SoftDeleteQuerySet(self.model, using=self._db)
 
@@ -49,13 +50,13 @@ class BaseModel(models.Model):
     ESTADOS = (("ACTIVO", "Activo"), ("INACTIVO", "Inactivo"))
 
     estado = models.CharField(max_length=10, choices=ESTADOS, default="ACTIVO")
-    created_at = models.DateTimeField(auto_now_add=True)  # timestamp creación
-    updated_at = models.DateTimeField(auto_now=True)      # timestamp update
+    created_at = models.DateTimeField(auto_now_add=True)   # creación
+    updated_at = models.DateTimeField(auto_now=True)       # actualización
     deleted_at = models.DateTimeField(null=True, blank=True)  # soft delete
 
     # Managers
-    objects = SoftDeleteManager()     # por defecto: vivos
-    all_objects = AllObjectsManager() # incluye eliminados
+    objects = SoftDeleteManager()      # por defecto: vivos
+    all_objects = AllObjectsManager()  # incluye eliminados
 
     class Meta:
         abstract = True
@@ -63,7 +64,7 @@ class BaseModel(models.Model):
     # Soft delete individual
     def delete(self, using=None, keep_parents=False):
         if self.deleted_at:
-            return  # ya eliminado lógicamente
+            return  # ya estaba eliminado
         self.deleted_at = timezone.now()
         self.estado = "INACTIVO"
         self.save(update_fields=["deleted_at", "estado", "updated_at"])
@@ -72,3 +73,21 @@ class BaseModel(models.Model):
     def hard_delete(self, using=None, keep_parents=False):
         return super().delete(using=using, keep_parents=keep_parents)
 
+
+# ---------------------------
+# Organization
+# ---------------------------
+class Organization(BaseModel):
+    name = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(blank=True, null=True)
+
+    class Meta:
+        db_table = "organizations"
+        indexes = [
+            models.Index(fields=["name"]),
+        ]
+        verbose_name = "Organización"
+        verbose_name_plural = "Organizaciones"
+
+    def __str__(self):
+        return self.name

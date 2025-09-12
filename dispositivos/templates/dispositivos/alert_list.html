@@ -1,36 +1,60 @@
 {% extends "base.html" %}
 {% block title %}Alertas{% endblock %}
-
 {% block content %}
-<a class="back" href="{% url "dashboard" %}">Volver al dashboard</a>
-<h2>Lista de Alertas</h2>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th>Fecha/Hora</th>
-      <th>Dispositivo</th>
-      <th>Severidad</th>
-      <th>Mensaje</th>
-      <th>Estado</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for a in alerts %}
+<h2>Alertas</h2>
+
+<div class="filters">
+  <a class="btn {% if show != 'all' %}btn-dark{% else %}btn-light{% endif %}" href="?">Pendientes</a>
+  <a class="btn {% if show == 'all' %}btn-dark{% else %}btn-light{% endif %}" href="?show=all">Todas</a>
+</div>
+
+<section class="card">
+  {% if is_empty_alerts %}
+    <p>Sin datos</p>
+  {% else %}
+  <table class="table">
+    <thead>
       <tr>
-        <td>{{ a.created_at }}</td>
-        <td><a href="{% url "device_detail" a.device.pk %}">{{ a.device.name }}</a></td>
+        <th>Severidad</th>
+        <th>Producto</th>
+        <th>Dispositivo</th>
+        <th>Medición</th>
+        <th>Rango</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in events %}
+      <tr>
         <td>
-          <span class="pill {% if a.severity == "GRAVE" %}danger{% elif a.severity == "ALTO" %}warn{% else %}muted{% endif %}">
-            {{ a.get_severity_display }}
+          <span class="pill {% if e.alert.severity == 'GRAVE' %}danger{% elif e.alert.severity == 'ALTO' %}warn{% else %}muted{% endif %}">
+            {{ e.alert.severity }}
           </span>
         </td>
-        <td>{{ a.message }}</td>
-        <td>{% if a.is_resolved %}Resuelta{% else %}Pendiente{% endif %}</td>
+        <td><a href="{% url 'dispositivos:product_detail' e.product.pk %}">{{ e.product.name }}</a></td>
+        <td>
+          {% if e.product.device %}
+            <a href="{% url 'dispositivos:device_detail' e.product.device.pk %}">{{ e.product.device.name }}</a>
+          {% else %}—{% endif %}
+        </td>
+        <td>{{ e.measurement.value }} {{ e.measurement.unit }} ({{ e.measurement.measured_at|date:"d/m/Y H:i" }})</td>
+        <td>{{ e.range_min }} – {{ e.range_max }} {{ e.unit }}</td>
+        <td>
+          {% if e.is_resolved %}
+            <span class="tag tag-muted">Resuelta</span>
+          {% else %}
+            <form method="post" action="{% url 'dispositivos:resolve_event' e.pk %}">
+              {% csrf_token %}
+              <button class="btn btn-light" type="submit">Marcar resuelta</button>
+            </form>
+          {% endif %}
+        </td>
       </tr>
-    {% empty %}
-      <tr><td colspan="5">No hay alertas registradas.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</section>
+
 {% endblock %}

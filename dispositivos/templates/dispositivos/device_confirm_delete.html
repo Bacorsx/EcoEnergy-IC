@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Eliminar Dispositivo · EcoEnergy{% endblock %}
+{% block content %}
+
+<a class="back" href="{% url 'dispositivos:device_detail' device.pk %}">Volver al dispositivo</a>
+
+<h2>Confirmar Eliminación</h2>
+
+<section class="card">
+  <div class="text-center p-20">
+    <div class="warning-icon">⚠️</div>
+    <h3>¿Estás seguro de que quieres eliminar este dispositivo?</h3>
+    <p class="muted">Esta acción no se puede deshacer.</p>
+  </div>
+
+  <div class="grid halves">
+    <section class="card">
+      <h3>Información del Dispositivo</h3>
+      <table class="table">
+        <tr>
+          <td><strong>Nombre:</strong></td>
+          <td>{{ device.name }}</td>
+        </tr>
+        <tr>
+          <td><strong>Número de Serie:</strong></td>
+          <td>{{ device.serial_number|default:"No especificado" }}</td>
+        </tr>
+        <tr>
+          <td><strong>Zona:</strong></td>
+          <td>{{ device.zone.name }}</td>
+        </tr>
+        <tr>
+          <td><strong>Organización:</strong></td>
+          <td>{{ device.organization.name }}</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h3>Impacto de la Eliminación</h3>
+      <ul class="list">
+        <li>
+          <span>Productos asociados:</span>
+          <span class="badge">{{ device.products.count }}</span>
+        </li>
+        <li>
+          <span>Mediciones totales:</span>
+          <span class="badge">{{ device.products.all|length }}</span>
+        </li>
+      </ul>
+      
+      {% if device.products.count > 0 %}
+        <div class="warning-box">
+          <strong>⚠️ Advertencia:</strong>
+          <p>
+            Este dispositivo tiene {{ device.products.count }} productos asociados. 
+            Al eliminar el dispositivo, estos productos también se eliminarán.
+          </p>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+
+  <div class="mt-24 text-center">
+    <form method="post" class="inline-flex">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">
+        Sí, eliminar dispositivo
+      </button>
+    </form>
+    <a class="btn btn-secondary ml-12" href="{% url 'dispositivos:device_detail' device.pk %}">
+      Cancelar
+    </a>
+  </div>
+</section>
+
+{% endblock %}

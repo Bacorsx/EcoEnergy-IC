@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}{% if product %}Editar{% else %}Nuevo{% endif %} Producto · EcoEnergy{% endblock %}
+{% block content %}
+
+<a class="back" href="{% if product %}{% url 'dispositivos:product_detail' product.pk %}{% else %}{% url 'dispositivos:product_list' %}{% endif %}">
+  Volver {% if product %}al producto{% else %}a productos{% endif %}
+</a>
+
+<h2>{% if product %}Editar Producto{% else %}Nuevo Producto{% endif %}</h2>
+
+<section class="card">
+  <form method="post">
+    {% csrf_token %}
+    
+    <div class="grid halves">
+      <div>
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        {{ form.name }}
+        {% if form.name.errors %}
+          <div class="error">{{ form.name.errors.0 }}</div>
+        {% endif %}
+      </div>
+      
+      <div>
+        <label for="{{ form.model.id_for_label }}">{{ form.model.label }}</label>
+        {{ form.model }}
+        {% if form.model.errors %}
+          <div class="error">{{ form.model.errors.0 }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="grid halves">
+      <div>
+        <label for="{{ form.serial_number.id_for_label }}">{{ form.serial_number.label }}</label>
+        {{ form.serial_number }}
+        {% if form.serial_number.errors %}
+          <div class="error">{{ form.serial_number.errors.0 }}</div>
+        {% endif %}
+      </div>
+      
+      <div>
+        <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+        {{ form.category }}
+        {% if form.category.errors %}
+          <div class="error">{{ form.category.errors.0 }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div>
+      <label for="{{ form.device.id_for_label }}">{{ form.device.label }}</label>
+      {{ form.device }}
+      {% if form.device.errors %}
+        <div class="error">{{ form.device.errors.0 }}</div>
+      {% endif %}
+      <small class="muted">Selecciona el dispositivo al que pertenece este producto</small>
+    </div>
+
+    <div class="mt-20">
+      <button type="submit" class="btn btn-primary">
+        {% if product %}Actualizar Producto{% else %}Crear Producto{% endif %}
+      </button>
+      <a class="btn btn-secondary" href="{% if product %}{% url 'dispositivos:product_detail' product.pk %}{% else %}{% url 'dispositivos:product_list' %}{% endif %}">
+        Cancelar
+      </a>
+    </div>
+  </form>
+</section>
+
+{% if product %}
+<section class="card">
+  <h3>Información Adicional</h3>
+  <table class="table">
+    <tr>
+      <td><strong>Creado:</strong></td>
+      <td>{{ product.created_at|date:"d/m/Y H:i" }}</td>
+    </tr>
+    <tr>
+      <td><strong>Última actualización:</strong></td>
+      <td>{{ product.updated_at|date:"d/m/Y H:i" }}</td>
+    </tr>
+    <tr>
+      <td><strong>Total mediciones:</strong></td>
+      <td>{{ product.measurements.count }}</td>
+    </tr>
+    <tr>
+      <td><strong>Alertas activas:</strong></td>
+      <td>{{ product.alerts.filter.is_resolved=False.count }}</td>
+    </tr>
+  </table>
+</section>
+{% endif %}
+
+{% endblock %}

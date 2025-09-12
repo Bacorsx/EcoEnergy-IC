@@ -12,9 +12,10 @@
     <div class="brand">EcoEnergy</div>
     <nav>
       {% if user.is_authenticated %}
-        <a href="{% url 'dashboard' %}">Dashboard</a>
-        <a href="{% url 'device_list' %}">Dispositivos</a>
-        <a href="{% url 'measurement_list' %}">Mediciones</a>
+        <a href="{% url 'dispositivos:dashboard' %}">Dashboard</a>
+        <a href="{% url 'dispositivos:device_list' %}">Dispositivos</a>
+        <a href="{% url 'dispositivos:product_list' %}">Productos</a>
+        <a href="{% url 'dispositivos:measurement_list' %}">Mediciones</a>
       {% endif %}
     </nav>
     <div class="auth">

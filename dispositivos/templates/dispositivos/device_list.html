@@ -2,7 +2,7 @@
 {% block title %}Dispositivos · EcoEnergy{% endblock %}
 {% block content %}
 
-<a class="back" href="{% url 'dashboard' %}">Volver al dashboard</a>
+<a class="back" href="{% url 'dispositivos:dashboard' %}">Volver al dashboard</a>
 <h2>DISPOSITIVOS</h2>
 
 <form method="get" class="filters row">
@@ -32,19 +32,29 @@
 </form>
 
 <section class="card">
-  <h3>Listado de dispositivos</h3>
+  <div class="card-head">
+    <h3>Listado de dispositivos</h3>
+    <a class="btn btn-primary" href="{% url 'dispositivos:device_create' %}">Nuevo dispositivo</a>
+  </div>
   <table class="table">
-    <thead><tr><th>Nombre</th><th>Categoría</th><th>Zona</th><th>Acciones</th></tr></thead>
+    <thead><tr><th>Nombre</th><th>Serie</th><th>Zona</th><th>Productos</th><th>Acciones</th></tr></thead>
     <tbody>
       {% for d in devices %}
         <tr>
-          <td>{{ d.name }}</td>
-          <td>{{ d.category.name }}</td>
+          <td>
+            <a href="{% url 'dispositivos:device_detail' d.pk %}" class="name">{{ d.name }}</a>
+          </td>
+          <td>{{ d.serial_number|default:"-" }}</td>
           <td>{{ d.zone.name }}</td>
-          <td><a class="btn btn-light" href="{% url 'device_detail' d.pk %}">Ver detalle</a></td>
+          <td>{{ d.products.count }}</td>
+          <td>
+            <a class="btn btn-light" href="{% url 'dispositivos:device_detail' d.pk %}">Ver</a>
+            <a class="btn btn-light" href="{% url 'dispositivos:device_update' d.pk %}">Editar</a>
+            <a class="btn btn-light" href="{% url 'dispositivos:device_delete' d.pk %}">Eliminar</a>
+          </td>
         </tr>
       {% empty %}
-        <tr><td colspan="4">No hay resultados</td></tr>
+        <tr><td colspan="5">No hay resultados</td></tr>
       {% endfor %}
     </tbody>
   </table>
